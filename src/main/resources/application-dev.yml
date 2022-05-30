@@ -1,0 +1,45 @@
+server:
+  port: 8088
+
+spring:
+  datasource:
+    # 配置多数据源
+    gym:
+      url: jdbc:mysql://localhost:3306/hp_gym?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+      username: root
+      password: 123456
+    druid:
+      filter:
+        stat:
+          enabled: true
+          db-type: mysql
+          log-slow-sql: true
+          slow-sql-millis: 2000
+
+      initial-size: 2
+      min-idle: 2
+      max-active: 5
+  #2.6以上版本springboot和2.9.2版本的swagger,启动时会出现
+  #Failed to start bean ‘documentationPluginsBootstrapper’的问题
+  #原因是在springboot2.6.0中将SpringMVC 默认路径匹配策略从AntPathMatcher 更改为PathPatternParser，
+  #导致出错，解决办法是切换回原先的AntPathMatcher
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+# security配置密码第一种方式,使用配置文件账号,密码登录
+#  security:
+#    user:
+#      name: xmf
+#      password: xmf
+
+#解决log日志debug不打印问题
+logging:
+  level:
+    com.lance.hp.hp_study: debug
+    root: info
+
+jwt:
+  tokenHeader: Authorization #JWT存储的请求头
+  secret: hp-study-secret #JWT加解密使用的密钥
+  expiration: 604800 #JWT的超期限时间(60*60*24*7)
+  tokenHead: 'Bearer'  #JWT负载中拿到开头
