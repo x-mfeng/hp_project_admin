@@ -15,5 +15,5 @@ public interface SysDeptService extends IService<SysDeptPO> {
 
     List<SysDeptPO> getDeptList(DeptDTO deptDTO);
 
-    void saveDept(SysDeptPO sysDeptPO);
+    Boolean saveDept(SysDeptPO sysDeptPO);
 }

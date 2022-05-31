@@ -1,6 +1,8 @@
 package com.lance.hp.hp_study.domain.dept;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -9,7 +11,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 部门表
@@ -21,6 +23,7 @@ public class SysDeptPO implements Serializable {
     /**
      * 部门id
      */
+    @TableId(type = IdType.AUTO)
     @NotNull(message="[部门id]不能为空")
     @ApiModelProperty("部门id")
     private Long deptId;
@@ -85,24 +88,24 @@ public class SysDeptPO implements Serializable {
     @Size(max= 64,message="编码长度不能超过64")
     @ApiModelProperty("创建者")
     @Length(max= 64,message="编码长度不能超过64")
-    private String createBy;
+    private Long createBy;
     /**
      * 创建时间
      */
     @ApiModelProperty("创建时间")
-    private Date createTime;
+    private LocalDateTime createTime;
     /**
      * 更新者
      */
     @Size(max= 64,message="编码长度不能超过64")
     @ApiModelProperty("更新者")
     @Length(max= 64,message="编码长度不能超过64")
-    private String updateBy;
+    private Long updateBy;
     /**
      * 更新时间
      */
     @ApiModelProperty("更新时间")
-    private Date updateTime;
+    private LocalDateTime updateTime;
 
 
     @TableField(exist = false)

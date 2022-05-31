@@ -3,16 +3,14 @@ package com.lance.hp.hp_study.domain.user;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
-
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
-
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 用户信息表
@@ -74,12 +72,12 @@ public class SysUserPO implements Serializable {
      * 创建时间
      */
     @ApiModelProperty("创建时间")
-    private Date createTime;
+    private LocalDateTime createTime;
     /**
      * 最后登录时间
      */
     @ApiModelProperty("最后登录时间")
-    private Date loginTime;
+    private LocalDateTime loginTime;
     /**
      * 帐号启用状态：0->禁用；1->启用
      */

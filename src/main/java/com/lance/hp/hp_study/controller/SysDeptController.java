@@ -39,8 +39,13 @@ public class SysDeptController {
     @ApiOperation(value = "保存部门")
     @PostMapping("saveDept")
     @ResponseBody
-    public CommonResult<List<SysDeptPO>> saveDept(@RequestBody SysDeptPO sysDeptPO) {
+    public CommonResult<Object> saveDept(@RequestBody SysDeptPO sysDeptPO) {
+        if (this.sysDeptService.saveDept(sysDeptPO)) {
+            return CommonResult.success();
+        } else {
+            return CommonResult.failed();
+        }
 
-        return CommonResult.success(null);
+
     }
 }
