@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lance.hp.hp_study.common.api.CommonResult;
 import com.lance.hp.hp_study.common.exception.Asserts;
 import com.lance.hp.hp_study.constants.DeleteStatusEnum;
 import com.lance.hp.hp_study.constants.StatusEnum;
@@ -14,9 +15,13 @@ import com.lance.hp.hp_study.mapper.SysDeptMapper;
 import com.lance.hp.hp_study.service.SysDeptService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author MaoFengX
@@ -25,6 +30,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@Transactional
 public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptPO>
         implements SysDeptService {
     /**
@@ -54,12 +60,17 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptPO>
     }
 
     @Override
-    public Boolean saveDept(SysDeptPO sysDeptPO) {
+    public CommonResult<Object> saveDept(SysDeptPO sysDeptPO) {
+        //parentId
         //根据parentId查询部门信息
         SysDeptPO parent = this.getById(sysDeptPO.getParentId());
-
-        sysDeptPO.setAncestors(parent.getAncestors() + "," + sysDeptPO.getParentId());
-        int count=0;
+        //判断parentId是否为0,是不是最顶级节点
+        if (Objects.isNull(parent)) {
+            sysDeptPO.setAncestors(String.valueOf(sysDeptPO.getParentId()));
+        } else {
+            sysDeptPO.setAncestors(parent.getAncestors() + "," + sysDeptPO.getParentId());
+        }
+        boolean boo;
         //判断是新增还是修改
         if (sysDeptPO.getDeptId() != null) {
             //设置时间
@@ -67,30 +78,59 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptPO>
             //设置userid
             sysDeptPO.setUpdateBy(1L);
             //修改
-          return this.update(new UpdateWrapper<SysDeptPO>().lambda()
-                    .set(SysDeptPO::getDeptName,sysDeptPO.getDeptName())
-                    .set(SysDeptPO::getParentId,sysDeptPO.getParentId())
-                    .set(SysDeptPO::getAncestors,sysDeptPO.getAncestors())
-                    .set(SysDeptPO::getOrderNum,sysDeptPO.getOrderNum())
-                    .set(SysDeptPO::getPhone,sysDeptPO.getPhone())
-                    .set(SysDeptPO::getEmail,sysDeptPO.getEmail())
-                    .set(SysDeptPO::getLeader,sysDeptPO.getLeader())
-                    .set(SysDeptPO::getStatus,sysDeptPO.getStatus())
-                    .set(SysDeptPO::getUpdateBy,sysDeptPO.getUpdateBy())
-                    .set(SysDeptPO::getUpdateTime,sysDeptPO.getUpdateTime())
+            boo = this.update(new UpdateWrapper<SysDeptPO>().lambda()
+                    .set(SysDeptPO::getDeptName, sysDeptPO.getDeptName())
+                    .set(SysDeptPO::getParentId, sysDeptPO.getParentId())
+                    .set(SysDeptPO::getAncestors, sysDeptPO.getAncestors())
+                    .set(SysDeptPO::getOrderNum, sysDeptPO.getOrderNum())
+                    .set(SysDeptPO::getPhone, sysDeptPO.getPhone())
+                    .set(SysDeptPO::getEmail, sysDeptPO.getEmail())
+                    .set(SysDeptPO::getLeader, sysDeptPO.getLeader())
+                    .set(SysDeptPO::getStatus, sysDeptPO.getStatus())
+                    .set(SysDeptPO::getUpdateBy, sysDeptPO.getUpdateBy())
+                    .set(SysDeptPO::getUpdateTime, sysDeptPO.getUpdateTime())
                     .eq(SysDeptPO::getDeptId, sysDeptPO.getDeptId()));
+            //查询状态是否为启用
+            //启用将所有上级改为启用
+            if (StatusEnum.ENALBE.getValue().equals(sysDeptPO.getStatus())) {
+                String[] idarr = sysDeptPO.getAncestors().split(",");
+                List<Long> ids = Arrays.stream(idarr).map(Long::parseLong).collect(Collectors.toList());
+                this.update(new UpdateWrapper<SysDeptPO>().lambda()
+                        .set(SysDeptPO::getStatus, sysDeptPO.getStatus())
+                        .in(SysDeptPO::getDeptId, ids)
+                );
+            } else {
+                //禁用将所有下级改为禁用
+                this.update(new UpdateWrapper<SysDeptPO>().lambda()
+                        .eq(SysDeptPO::getParentId, sysDeptPO.getDeptId())
+                        .or().like(SysDeptPO::getAncestors, "," + sysDeptPO.getDeptId() + ",")
+                        .set(SysDeptPO::getStatus, sysDeptPO.getStatus())
+                );
+            }
+
         } else {
             //新增
             //判断是否启用
-            if (!StatusEnum.ENALBE.getValue().equals(parent.getStatus())) {
-                Asserts.fail("部门停用，不允许新增");
+            try {
+                if (!StatusEnum.ENALBE.getValue().equals(parent.getStatus())) {
+                    Asserts.fail("部门停用，不允许新增");
+                }
+            } catch (Exception e) {
+                log.warn("部门新增失败:{}", e.getMessage());
+                return CommonResult.failed("部门停用，不允许新增");
             }
+
             //设置时间
             sysDeptPO.setCreateTime(LocalDateTime.now());
             //设置userid
             sysDeptPO.setCreateBy(1L);
-           return this.save(sysDeptPO);
+            boo = this.save(sysDeptPO);
+
         }
+        if (boo) {
+            return CommonResult.success();
+        }
+        return CommonResult.failed();
     }
 
 

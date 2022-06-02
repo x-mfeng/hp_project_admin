@@ -40,12 +40,6 @@ public class SysDeptController {
     @PostMapping("saveDept")
     @ResponseBody
     public CommonResult<Object> saveDept(@RequestBody SysDeptPO sysDeptPO) {
-        if (this.sysDeptService.saveDept(sysDeptPO)) {
-            return CommonResult.success();
-        } else {
-            return CommonResult.failed();
-        }
-
-
+        return this.sysDeptService.saveDept(sysDeptPO);
     }
 }

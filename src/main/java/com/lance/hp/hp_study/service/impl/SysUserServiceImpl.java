@@ -3,16 +3,16 @@ package com.lance.hp.hp_study.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.lance.hp.hp_study.common.exception.Asserts;
 import com.lance.hp.hp_study.domain.user.SysUserPO;
 import com.lance.hp.hp_study.dto.user.UserDTO;
-import com.lance.hp.hp_study.service.SysUserService;
 import com.lance.hp.hp_study.mapper.SysUserMapper;
+import com.lance.hp.hp_study.service.SysUserService;
 import com.lance.hp.hp_study.util.JwtTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +24,7 @@ import java.util.Objects;
 */
 @Service
 @Slf4j
+@Transactional
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUserPO>
     implements SysUserService{
 
