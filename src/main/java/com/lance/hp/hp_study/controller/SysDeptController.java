@@ -42,4 +42,11 @@ public class SysDeptController {
     public CommonResult<Object> saveDept(@RequestBody SysDeptPO sysDeptPO) {
         return this.sysDeptService.saveDept(sysDeptPO);
     }
+
+    @ApiOperation(value = "删除部门")
+    @PostMapping("deleteDept")
+    @ResponseBody
+    public CommonResult<Object> deleteDept(@RequestParam(value = "deptId") String deptId) {
+        return this.sysDeptService.deleteDept(deptId);
+    }
 }

@@ -21,9 +21,16 @@ public interface SysDeptService extends IService<SysDeptPO> {
     List<SysDeptPO> getDeptList(DeptDTO deptDTO);
 
     /**
-     * 根据dept
-     * @param sysDeptPO
-     * @return
+     * 根据deptId进行保存或修改
+     * @param sysDeptPO 部门信息
+     * @return 保存操作结果
      */
     CommonResult<Object> saveDept(SysDeptPO sysDeptPO);
+
+    /**
+     * 删除部门
+     * @param deptId 部门id
+     * @return 删除操作结果
+     */
+    CommonResult<Object> deleteDept(String deptId);
 }
