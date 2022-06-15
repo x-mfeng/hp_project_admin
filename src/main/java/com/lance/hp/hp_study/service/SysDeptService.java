@@ -1,7 +1,6 @@
 package com.lance.hp.hp_study.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.lance.hp.hp_study.common.api.CommonResult;
 import com.lance.hp.hp_study.domain.dept.SysDeptPO;
 import com.lance.hp.hp_study.dto.dept.DeptDTO;
 
@@ -25,12 +24,12 @@ public interface SysDeptService extends IService<SysDeptPO> {
      * @param sysDeptPO 部门信息
      * @return 保存操作结果
      */
-    CommonResult<Object> saveDept(SysDeptPO sysDeptPO);
+   Boolean saveDept(SysDeptPO sysDeptPO);
 
     /**
      * 删除部门
      * @param deptId 部门id
      * @return 删除操作结果
      */
-    CommonResult<Object> deleteDept(String deptId);
+    Boolean deleteDept(String deptId);
 }

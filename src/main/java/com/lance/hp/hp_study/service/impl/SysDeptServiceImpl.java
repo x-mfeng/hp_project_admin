@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lance.hp.hp_study.common.api.CommonResult;
 import com.lance.hp.hp_study.common.exception.Asserts;
 import com.lance.hp.hp_study.constants.DeleteStatusEnum;
 import com.lance.hp.hp_study.constants.StatusEnum;
@@ -62,11 +61,12 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptPO>
 
     /**
      * 有deptId,进行修改.无deptId,进行新增
+     *
      * @param sysDeptPO 部门信息
      * @return 保存部门操作结果
      */
     @Override
-    public CommonResult<Object> saveDept(SysDeptPO sysDeptPO) {
+    public Boolean saveDept(SysDeptPO sysDeptPO) {
         //parentId
         //根据parentId查询部门信息
         SysDeptPO parent = this.getById(sysDeptPO.getParentId());
@@ -117,47 +117,35 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptPO>
         } else {
             //新增
             //判断是否启用
-            try {
-                if (!StatusEnum.ENALBE.getValue().equals(parent.getStatus())) {
-                    Asserts.fail("部门停用，不允许新增");
-                }
-            } catch (Exception e) {
-                log.warn("部门新增失败:{}", e.getMessage());
-                return CommonResult.failed("部门停用，不允许新增");
+            if (!StatusEnum.ENALBE.getValue().equals(parent.getStatus())) {
+                Asserts.fail("部门停用，不允许新增");
             }
-
             //设置时间
             sysDeptPO.setCreateTime(LocalDateTime.now());
             //设置userid
             sysDeptPO.setCreateBy(1L);
             boo = this.save(sysDeptPO);
+            //
+        }
 
-        }
-        if (boo) {
-            return CommonResult.success();
-        }
-        return CommonResult.failed();
+        return boo;
     }
 
     /**
      * 根据部门id进行删除
+     *
      * @param deptId 部门id
      * @return 删除操作结果
      */
     @Override
-    public CommonResult<Object> deleteDept(String deptId) {
+    public Boolean deleteDept(String deptId) {
         //判断是否存在下级部门
-       List<SysDeptPO> childrenList= this.list(new QueryWrapper<SysDeptPO>().lambda().eq(SysDeptPO::getParentId, deptId));
-        if (CollectionUtils.isNotEmpty(childrenList)){
-            return CommonResult.failed("存在下级部门，不允许删除");
+        List<SysDeptPO> childrenList = this.list(new QueryWrapper<SysDeptPO>().lambda().eq(SysDeptPO::getParentId, deptId));
+        if (CollectionUtils.isNotEmpty(childrenList)) {
+            Asserts.fail("存在下级部门，不允许删除");
         }
-      boolean boo=  this.remove(new QueryWrapper<SysDeptPO>().lambda().eq(SysDeptPO::getDeptId,deptId));
-        if(boo){
-            return CommonResult.success("操作成功");
-        }
-       return CommonResult.failed("操作失败");
+        return this.remove(new QueryWrapper<SysDeptPO>().lambda().eq(SysDeptPO::getDeptId, deptId));
     }
-
 
 }
 

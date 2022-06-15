@@ -40,13 +40,19 @@ public class SysDeptController {
     @PostMapping("saveDept")
     @ResponseBody
     public CommonResult<Object> saveDept(@RequestBody SysDeptPO sysDeptPO) {
-        return this.sysDeptService.saveDept(sysDeptPO);
+        if (this.sysDeptService.saveDept(sysDeptPO)) {
+            return CommonResult.success("操作成功");
+        }
+        return CommonResult.failed("操作失败");
     }
 
     @ApiOperation(value = "删除部门")
     @PostMapping("deleteDept")
     @ResponseBody
     public CommonResult<Object> deleteDept(@RequestParam(value = "deptId") String deptId) {
-        return this.sysDeptService.deleteDept(deptId);
+        if (this.sysDeptService.deleteDept(deptId)) {
+            return CommonResult.success("操作成功");
+        }
+        return CommonResult.failed("操作失败");
     }
 }
